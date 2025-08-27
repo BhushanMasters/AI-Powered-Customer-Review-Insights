@@ -1,0 +1,124 @@
+{
+  "reviews": [
+    {
+      "review_id": "D001",
+      "date": "2025-03-01",
+      "rating": "★☆☆☆☆ (1 star)",
+      "text": "The delivery was delayed by more than an hour and the food was cold. Tracking updates were also wrong."
+    },
+    {
+      "review_id": "D002",
+      "date": "2025-03-02",
+      "rating": "★★☆☆☆ (2 stars)",
+      "text": "Food was missing from my order and customer support did not resolve the issue. Need better service."
+    },
+    {
+      "review_id": "D003",
+      "date": "2025-03-03",
+      "rating": "★★★☆☆ (3 stars)",
+      "text": "The app is easy to use but the checkout process is very confusing. Please simplify payment flow."
+    },
+    {
+      "review_id": "D004",
+      "date": "2025-03-04",
+      "rating": "★★★★☆ (4 stars)",
+      "text": "Delivery was quick and food quality was good. But please add more vegetarian options."
+    },
+    {
+      "review_id": "D005",
+      "date": "2025-03-05",
+      "rating": "★★☆☆☆ (2 stars)",
+      "text": "Cold food and late delivery again. This keeps happening and is very frustrating."
+    },
+    {
+      "review_id": "D006",
+      "date": "2025-03-06",
+      "rating": "★☆☆☆☆ (1 star)",
+      "text": "Order had missing items. Rider was also rude. Very poor experience."
+    },
+    {
+      "review_id": "D007",
+      "date": "2025-03-07",
+      "rating": "★★★☆☆ (3 stars)",
+      "text": "App looks modern but often crashes during payment. Please fix bugs in the app."
+    },
+    {
+      "review_id": "D008",
+      "date": "2025-03-08",
+      "rating": "★★★★☆ (4 stars)",
+      "text": "Food was tasty and fresh. Delivery was on time. Please add wallet payment option."
+    },
+    {
+      "review_id": "D009",
+      "date": "2025-03-09",
+      "rating": "★★☆☆☆ (2 stars)",
+      "text": "Delivery rider was rude and did not handle the package properly. Food was spilled inside the bag."
+    },
+    {
+      "review_id": "D010",
+      "date": "2025-03-10",
+      "rating": "★★★☆☆ (3 stars)",
+      "text": "Search function in the app is not accurate. Please improve so I can find dishes faster."
+    },
+    {
+      "review_id": "D011",
+      "date": "2025-03-11",
+      "rating": "★☆☆☆☆ (1 star)",
+      "text": "Worst experience ever. Food was cold, delivery was late, and two items were missing."
+    },
+    {
+      "review_id": "D012",
+      "date": "2025-03-12",
+      "rating": "★★★★☆ (4 stars)",
+      "text": "Good service overall. Please add more discounts for regular customers."
+    },
+    {
+      "review_id": "D013",
+      "date": "2025-03-13",
+      "rating": "★★☆☆☆ (2 stars)",
+      "text": "Tracking system is inaccurate. Delivery was late and food arrived cold."
+    },
+    {
+      "review_id": "D014",
+      "date": "2025-03-14",
+      "rating": "★★★☆☆ (3 stars)",
+      "text": "Checkout is too slow and often fails during payment. Please improve app stability."
+    },
+    {
+      "review_id": "D015",
+      "date": "2025-03-15",
+      "rating": "★★★★★ (5 stars)",
+      "text": "Amazing experience! Fast delivery, hot food, and very polite rider. Best so far."
+    },
+    {
+      "review_id": "D016",
+      "date": "2025-03-16",
+      "rating": "★★☆☆☆ (2 stars)",
+      "text": "Rider was rude and food was missing again. Very poor service quality."
+    },
+    {
+      "review_id": "D017",
+      "date": "2025-03-17",
+      "rating": "★★★☆☆ (3 stars)",
+      "text": "Please improve the app search and add better filters for cuisine."
+    },
+    {
+      "review_id": "D018",
+      "date": "2025-03-18",
+      "rating": "★★★★☆ (4 stars)",
+      "text": "Food was fresh and tasty. Delivery was quick. Please add more payment methods."
+    },
+    {
+      "review_id": "D019",
+      "date": "2025-03-19",
+      "rating": "★★☆☆☆ (2 stars)",
+      "text": "Late delivery, cold food, and careless packaging. Very disappointed."
+    },
+    {
+      "review_id": "D020",
+      "date": "2025-03-20",
+      "rating": "★★★☆☆ (3 stars)",
+      "text": "Checkout experience is confusing. Please redesign the payment flow."
+    }
+  ]
+}
