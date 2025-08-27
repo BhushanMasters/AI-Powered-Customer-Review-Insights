@@ -1,0 +1,124 @@
+{
+  "reviews": [
+    {
+      "review_id": "E001",
+      "date": "2025-02-01",
+      "rating": "★★☆☆☆ (2 stars)",
+      "text": "The package arrived late and the box was damaged. Very poor delivery service."
+    },
+    {
+      "review_id": "E002",
+      "date": "2025-02-02",
+      "rating": "★☆☆☆☆ (1 star)",
+      "text": "I received the wrong product. Contacted support but got no proper response."
+    },
+    {
+      "review_id": "E003",
+      "date": "2025-02-03",
+      "rating": "★★★☆☆ (3 stars)",
+      "text": "The website is easy to browse but the checkout process is very confusing. Please simplify it."
+    },
+    {
+      "review_id": "E004",
+      "date": "2025-02-04",
+      "rating": "★★★★☆ (4 stars)",
+      "text": "Product quality is good, but delivery tracking updates are very slow."
+    },
+    {
+      "review_id": "E005",
+      "date": "2025-02-05",
+      "rating": "★★☆☆☆ (2 stars)",
+      "text": "The product is fine, but customer service is rude and unhelpful."
+    },
+    {
+      "review_id": "E006",
+      "date": "2025-02-06",
+      "rating": "★★★☆☆ (3 stars)",
+      "text": "Please add more payment options like UPI and wallets. Current options are limited."
+    },
+    {
+      "review_id": "E007",
+      "date": "2025-02-07",
+      "rating": "★★☆☆☆ (2 stars)",
+      "text": "The product description was misleading. Not happy with what I received."
+    },
+    {
+      "review_id": "E008",
+      "date": "2025-02-08",
+      "rating": "★★★★☆ (4 stars)",
+      "text": "Delivery was on time but packaging could be better. Box was half open."
+    },
+    {
+      "review_id": "E009",
+      "date": "2025-02-09",
+      "rating": "★☆☆☆☆ (1 star)",
+      "text": "Worst shopping experience. Late delivery, wrong item, and poor support all in one order."
+    },
+    {
+      "review_id": "E010",
+      "date": "2025-02-10",
+      "rating": "★★★☆☆ (3 stars)",
+      "text": "Website design is nice, but please fix the search functionality. Results are often irrelevant."
+    },
+    {
+      "review_id": "E011",
+      "date": "2025-02-11",
+      "rating": "★★★★☆ (4 stars)",
+      "text": "Overall good shopping experience. Please add live chat support for faster help."
+    },
+    {
+      "review_id": "E012",
+      "date": "2025-02-12",
+      "rating": "★★☆☆☆ (2 stars)",
+      "text": "Delivery delay again. Tracking system does not work properly."
+    },
+    {
+      "review_id": "E013",
+      "date": "2025-02-13",
+      "rating": "★★★☆☆ (3 stars)",
+      "text": "Checkout flow is very slow. Please improve payment processing speed."
+    },
+    {
+      "review_id": "E014",
+      "date": "2025-02-14",
+      "rating": "★★★★☆ (4 stars)",
+      "text": "Product is good but packaging looked careless. Please improve quality checks."
+    },
+    {
+      "review_id": "E015",
+      "date": "2025-02-15",
+      "rating": "★★☆☆☆ (2 stars)",
+      "text": "Received a defective item. Very disappointed. Need stricter quality checks."
+    },
+    {
+      "review_id": "E016",
+      "date": "2025-02-16",
+      "rating": "★★★☆☆ (3 stars)",
+      "text": "Please improve product images on the website. They are not very clear."
+    },
+    {
+      "review_id": "E017",
+      "date": "2025-02-17",
+      "rating": "★★★★★ (5 stars)",
+      "text": "Amazing service! Product exactly as described, fast delivery, and polite delivery staff."
+    },
+    {
+      "review_id": "E018",
+      "date": "2025-02-18",
+      "rating": "★☆☆☆☆ (1 star)",
+      "text": "Terrible experience. Wrong product sent and packaging was torn."
+    },
+    {
+      "review_id": "E019",
+      "date": "2025-02-19",
+      "rating": "★★★☆☆ (3 stars)",
+      "text": "Website often crashes during checkout. Please fix technical bugs."
+    },
+    {
+      "review_id": "E020",
+      "date": "2025-02-20",
+      "rating": "★★★★☆ (4 stars)",
+      "text": "Overall good purchase. Please add more offers and discounts for regular customers."
+    }
+  ]
+}
