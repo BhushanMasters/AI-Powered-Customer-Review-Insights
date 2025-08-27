@@ -1,15 +1,19 @@
+# app.py
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
 from datetime import datetime
 from data_ingester import DataIngester
 from review_analyzer import ReviewAnalyzer
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
+import io
+
+st.sidebar.image('customer-review-4396641_1280.png')
 
 # Page configuration
 st.set_page_config(
-    page_title="AI Review Insights Dashboard",
-    page_icon="📊",
+    page_title="AI-Powered Review Insights",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -17,12 +21,12 @@ st.set_page_config(
 # Custom CSS
 st.markdown("""
 <style>
-    .main-header {font-size: 2.5rem; color: #1f77b4; margin-bottom: 1rem;}
-    .metric-card {background-color: #f0f2f6; padding: 15px; border-radius: 10px; margin: 10px;}
+    .main-header {font-size: 2rem; color: #1f77b4; margin-bottom: 1rem;}
     .positive {color: green; font-weight: bold;}
     .negative {color: red; font-weight: bold;}
     .neutral {color: orange; font-weight: bold;}
-    .upload-section {background-color: #e8f4f8; padding: 20px; border-radius: 10px; margin-bottom: 20px;}
+    .metric-card {background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                 color: white; padding: 15px; border-radius: 10px; margin: 5px;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -30,359 +34,258 @@ class ReviewDashboard:
     def __init__(self):
         self.ingester = DataIngester()
         self.analyzer = ReviewAnalyzer()
-        self.analyzed_df = pd.DataFrame()
     
     def render_upload_section(self):
-        """Render file upload section"""
-        st.markdown('<div class="upload-section">', unsafe_allow_html=True)
-        st.subheader("📁 Upload Your Customer Reviews")
+        """File upload + JSON paste"""
+        st.sidebar.title("Upload or Paste Reviews")
         
-        uploaded_file = st.file_uploader(
-            "Choose a JSON or CSV file",
+        uploaded_file = st.sidebar.file_uploader(
+            "Choose review file",
             type=['json', 'csv'],
-            help="Upload a file containing customer reviews. Supported formats: JSON, CSV"
+            help="Upload JSON or CSV file with customer reviews"
         )
+
+        st.sidebar.markdown("---")
+        st.sidebar.write("Or paste raw JSON data:")
+        pasted_json = st.sidebar.text_area("Paste JSON here", height=150)
         
-        st.markdown("""
-        **Expected JSON Format:**
-        ```json
-        [
-            {
-                "review_id": "R12345",
-                "date": "2025-01-01",
-                "rating": "★★★☆☆ (3 stars)",
-                "text": "Your review text here..."
-            }
-        ]
-        ```
-        
-        **Or any structure with review text content**
-        """)
-        
-        st.markdown('</div>', unsafe_allow_html=True)
-        return uploaded_file
+        return uploaded_file, pasted_json
     
-    def process_uploaded_file(self, uploaded_file):
-        """Process the uploaded file and analyze reviews"""
-        if uploaded_file is None:
-            return None
-        
-        with st.spinner("📥 Reading uploaded file..."):
+    def process_input(self, uploaded_file, pasted_json):
+        """Process uploaded file or pasted JSON"""
+        if uploaded_file:
             raw_reviews = self.ingester.ingest_file(uploaded_file)
+        elif pasted_json.strip():
+            raw_reviews = self.ingester.ingest_file(io.StringIO(pasted_json))
+        else:
+            return None
         
         if not raw_reviews:
-            st.error("No valid reviews found in the uploaded file.")
+            st.error("No valid reviews found.")
             return None
         
-        st.success(f"✅ Successfully loaded {len(raw_reviews)} reviews from {uploaded_file.name}")
-        
-        # Show raw data preview
-        with st.expander("📋 Preview Raw Data"):
-            if raw_reviews:
-                preview_data = []
-                for review in raw_reviews[:5]:  # Show first 5 reviews
-                    if isinstance(review, dict):
-                        preview_data.append({
-                            'review_id': review.get('review_id', 'N/A'),
-                            'date': review.get('date', 'N/A'),
-                            'rating': review.get('rating', 'N/A'),
-                            'text_preview': str(review.get('text', 'N/A'))[:100] + '...' if review.get('text') else 'N/A'
-                        })
-                if preview_data:
-                    st.dataframe(pd.DataFrame(preview_data))
-        
-        # Analyze reviews
-        with st.spinner("🤖 Analyzing reviews with AI..."):
-            self.analyzed_df = self.analyzer.analyze_batch(raw_reviews)
-        
-        if not self.analyzed_df.empty:
-            st.success("✅ Analysis complete! Displaying insights...")
-            return self.analyzed_df
-        else:
-            st.error("❌ Analysis failed. Please check your file format.")
-            return None
+        with st.spinner("Analyzing reviews..."):
+            df = self.analyzer.analyze_batch(raw_reviews)
+            return df
     
     def create_dashboard(self, df):
-        """Create the main dashboard with analysis results"""
+        """Main dashboard layout"""
+        st.title("AI-Powered Customer Review Insights")
         
-        # Header
-        st.markdown('<h1 class="main-header">📊 AI-Powered Customer Review Insights</h1>', 
-                   unsafe_allow_html=True)
+        # Key metrics
+        self.render_metrics(df)
         
-        # Key Metrics
-        st.subheader("📈 Key Metrics")
+        # Main tabs
+        tab1, tab2, tab3, tab4, tab5 = st.tabs([
+            "Overview", "Sentiment Analysis", "Topics & Problems",
+            "Review Browser", "Export Data"
+        ])
+        
+        with tab1:
+            self.render_overview(df)
+        with tab2:
+            self.render_sentiment_analysis(df)
+        with tab3:
+            self.render_topics_problems(df)
+        with tab4:
+            self.render_review_browser(df)
+        with tab5:
+            self.render_export(df)
+    
+    def render_metrics(self, df):
+        """Display key metrics"""
         col1, col2, col3, col4, col5 = st.columns(5)
         
         with col1:
             st.metric("Total Reviews", len(df))
-        
         with col2:
             positive = len(df[df['sentiment'] == 'positive'])
             st.metric("Positive", positive)
-        
         with col3:
             negative = len(df[df['sentiment'] == 'negative'])
             st.metric("Negative", negative)
-        
         with col4:
             neutral = len(df[df['sentiment'] == 'neutral'])
             st.metric("Neutral", neutral)
-        
         with col5:
-            avg_rating = df['numeric_rating'].mean()
-            st.metric("Avg Rating", f"{avg_rating:.1f}/5")
-        
-        # Main tabs
-        tab1, tab2, tab3, tab4, tab5 = st.tabs([
-            "📊 Overview", "🧠 Sentiment Analysis", "🔍 Topics & Insights", 
-            "⭐ Rating Analysis", "📋 Raw Data"
-        ])
-        
-        with tab1:
-            self.render_overview_tab(df)
-        
-        with tab2:
-            self.render_sentiment_tab(df)
-        
-        with tab3:
-            self.render_insights_tab(df)
-        
-        with tab4:
-            self.render_rating_tab(df)
-        
-        with tab5:
-            self.render_raw_data_tab(df)
+            avg_rating = df['rating_num'].dropna().mean()
+            st.metric("Avg Rating", f"{avg_rating:.1f}/5" if not pd.isna(avg_rating) else "N/A")
     
-    def render_overview_tab(self, df):
-        """Render overview tab"""
+    def render_overview(self, df):
+        """Overview tab with charts"""
         col1, col2 = st.columns(2)
         
         with col1:
-            # Sentiment distribution
             sentiment_counts = df['sentiment'].value_counts()
-            fig = px.pie(
-                values=sentiment_counts.values, 
-                names=sentiment_counts.index,
-                title="Sentiment Distribution",
-                color=sentiment_counts.index,
-                color_discrete_map={'positive': 'green', 'negative': 'red', 'neutral': 'orange'}
-            )
+            fig = px.pie(values=sentiment_counts.values, names=sentiment_counts.index,
+                         title="Sentiment Distribution", hole=0.3)
             st.plotly_chart(fig, use_container_width=True)
         
         with col2:
-            # Rating distribution
-            fig = px.histogram(df, x='numeric_rating', nbins=5,
-                             title="Rating Distribution",
-                             labels={'numeric_rating': 'Rating'})
+            fig = px.histogram(df, x='rating_num', nbins=5,
+                               title="Rating Distribution", labels={'rating_num': 'Rating'})
             fig.update_xaxes(dtick=1)
             st.plotly_chart(fig, use_container_width=True)
-        
-        # Success rate
-        success_rate = (df['analysis_success'].sum() / len(df)) * 100
-        st.metric("Analysis Success Rate", f"{success_rate:.1f}%")
     
-    def render_sentiment_tab(self, df):
-        """Render sentiment analysis tab"""
-        st.subheader("Detailed Sentiment Analysis")
+    def render_sentiment_analysis(self, df):
+        """Sentiment analysis details"""
+        st.subheader("Sentiment Analysis")
         
-        # Filter options
-        col1, col2 = st.columns(2)
-        with col1:
-            sentiment_filter = st.selectbox("Filter by Sentiment", 
-                                          ["All", "Positive", "Negative", "Neutral"])
-        with col2:
-            min_rating = st.slider("Minimum Rating", 1.0, 5.0, 1.0, 0.5)
+        sentiment_filter = st.selectbox("Filter by Sentiment", ["All", "Positive", "Negative", "Neutral"])
+        rating_filter = st.slider("Minimum Rating", 1, 5, 1)
         
-        # Apply filters
-        filtered_df = df[df['numeric_rating'] >= min_rating]
+        filtered_df = df[df['rating_num'].fillna(1) >= rating_filter]
         if sentiment_filter != "All":
             filtered_df = filtered_df[filtered_df['sentiment'] == sentiment_filter.lower()]
         
-        # Display filtered reviews
         for _, row in filtered_df.iterrows():
-            sentiment_color = row['sentiment']
-            
-            with st.expander(f"📝 {row['review_id']} - {row['date']} - Rating: {row['numeric_rating']}/5"):
-                col_a, col_b = st.columns([1, 2])
-                
-                with col_a:
-                    st.markdown(f"**Sentiment:** <span class='{sentiment_color}'>{row['sentiment'].upper()}</span>", 
-                               unsafe_allow_html=True)
-                    st.write(f"**Original Rating:** {row['original_rating']}")
-                    st.write(f"**Words:** {row['word_count']}")
-                
-                with col_b:
-                    st.write("**Review Text:**")
-                    st.write(row['text'])
-                    
-                    if row['problems']:
-                        st.write("**⚠️ Problems:**")
-                        for problem in row['problems']:
-                            st.write(f"- {problem}")
-                    
-                    if row['suggestions']:
-                        st.write("**💡 Suggestions:**")
-                        for suggestion in row['suggestions']:
-                            st.write(f"- {suggestion}")
+            with st.expander(f"{row['review_id']} - {row.get('date', 'No date')} - Rating: {row['rating_num']}/5"):
+                self.render_review_detail(row)
     
-    def render_insights_tab(self, df):
-        """Render insights tab"""
-        st.subheader("Aggregated Business Insights")
-        
+    def render_topics_problems(self, df):
+        """Topics, Problems (with charts) + Suggestions (list)"""
         col1, col2 = st.columns(2)
         
         with col1:
-            # Topics word cloud
-            st.subheader("📌 Most Discussed Topics")
+            st.subheader("Most Discussed Topics")
             all_topics = []
             for topics in df['topics']:
-                if isinstance(topics, list):
-                    all_topics.extend(topics)
-            
+                all_topics.extend(topics)
             if all_topics:
-                topic_counts = pd.Series(all_topics).value_counts().head(15)
+                topic_counts = pd.Series(all_topics).value_counts().head(10)
                 fig = px.bar(
-                    x=topic_counts.values, 
+                    x=topic_counts.values,
                     y=topic_counts.index,
                     orientation='h',
-                    title="Top 15 Topics",
-                    labels={'x': 'Frequency', 'y': 'Topic'}
+                    text=topic_counts.values,
+                    title="Top Topics"
                 )
+                fig.update_traces(textposition="outside")
                 st.plotly_chart(fig, use_container_width=True)
             else:
-                st.info("No topics identified in the reviews")
+                st.info("No topics extracted.")
         
         with col2:
-            # Problems analysis
-            st.subheader("⚠️ Critical Issues")
+            st.subheader("Top Problems Identified")
             all_problems = []
             for problems in df['problems']:
-                if isinstance(problems, list):
-                    all_problems.extend(problems)
-            
+                all_problems.extend(problems)
             if all_problems:
                 problem_counts = pd.Series(all_problems).value_counts().head(10)
                 fig = px.bar(
                     x=problem_counts.values,
                     y=problem_counts.index,
                     orientation='h',
-                    title="Top 10 Problems",
-                    labels={'x': 'Frequency', 'y': 'Problem'}
+                    text=problem_counts.values,
+                    title="Top Problems"
                 )
+                fig.update_traces(textposition="outside")
                 st.plotly_chart(fig, use_container_width=True)
             else:
-                st.info("No problems identified")
+                st.info("No problems detected.")
         
-        # Suggestions section
-        st.subheader("💡 Customer Suggestions & Feature Requests")
+        st.subheader("Customer Suggestions")
         all_suggestions = []
         for suggestions in df['suggestions']:
-            if isinstance(suggestions, list):
-                all_suggestions.extend(suggestions)
-        
+            all_suggestions.extend(suggestions)
         if all_suggestions:
-            unique_suggestions = list(set(all_suggestions))
-            for i, suggestion in enumerate(unique_suggestions, 1):
-                st.write(f"{i}. **{suggestion}**")
+            for i, suggestion in enumerate(set(all_suggestions), 1):
+                st.write(f"{i}. {suggestion}")
         else:
-            st.info("No suggestions found in reviews")
+            st.info("No suggestions found.")
+
     
-    def render_rating_tab(self, df):
-        """Render rating analysis tab"""
-        st.subheader("⭐ Detailed Rating Analysis")
+    def render_review_browser(self, df):
+        """Review browser tab"""
+        st.subheader("Review Browser")
+        search_term = st.text_input("Search reviews")
         
-        col1, col2 = st.columns(2)
+        if search_term:
+            filtered_df = df[df['text'].str.contains(search_term, case=False, na=False)]
+        else:
+            filtered_df = df
         
-        with col1:
-            # Rating vs Sentiment
-            rating_sentiment = df.groupby(['numeric_rating', 'sentiment']).size().unstack(fill_value=0)
-            fig = px.bar(rating_sentiment, title="Rating vs Sentiment",
-                        labels={'value': 'Count', 'numeric_rating': 'Rating'})
-            st.plotly_chart(fig, use_container_width=True)
-        
-        with col2:
-            # Rating distribution by sentiment
-            fig = px.box(df, x='sentiment', y='numeric_rating',
-                        title="Rating Distribution by Sentiment")
-            st.plotly_chart(fig, use_container_width=True)
-        
-        # Correlation analysis
-        st.subheader("📊 Review Length vs Rating")
-        fig = px.scatter(df, x='word_count', y='numeric_rating', color='sentiment',
-                        title="Does Review Length Correlate with Rating?",
-                        labels={'word_count': 'Number of Words', 'numeric_rating': 'Rating'})
-        st.plotly_chart(fig, use_container_width=True)
+        for _, row in filtered_df.iterrows():
+            with st.expander(f"Review {row['review_id']} - Rating: {row['rating_num']}/5"):
+                self.render_review_detail(row)
     
-    def render_raw_data_tab(self, df):
-        """Render raw data tab"""
-        st.subheader("📊 Complete Analyzed Data")
-        
-        # Show dataframe with important columns
-        display_cols = ['review_id', 'date', 'original_rating', 'numeric_rating', 
-                       'sentiment', 'word_count', 'analysis_success']
-        st.dataframe(df[display_cols], use_container_width=True, height=400)
-        
-        # Download options
+    def render_review_detail(self, row):
+        """Render individual review details"""
         col1, col2 = st.columns(2)
-        
         with col1:
-            csv = df.to_csv(index=False)
-            st.download_button(
-                label="📥 Download Full Data (CSV)",
-                data=csv,
-                file_name="complete_analysis.csv",
-                mime="text/csv"
-            )
-        
+            st.write(f"**Date:** {row.get('date', 'N/A')}")
+            st.write(f"**Rating:** {row.get('rating_text', 'N/A')} ({row['rating_num']}/5)")
+            st.write(f"**Sentiment:** <span class='{row['sentiment']}'>{row['sentiment'].upper()}</span>",
+                     unsafe_allow_html=True)
         with col2:
-            summary_csv = df[display_cols].to_csv(index=False)
-            st.download_button(
-                label="📥 Download Summary (CSV)",
-                data=summary_csv,
-                file_name="analysis_summary.csv",
-                mime="text/csv"
-            )
+            st.write(f"**Words:** {row['word_count']} ({row['length_category']})")
+            st.write(f"**Characters:** {row['char_count']}")
+            st.write(f"**Has Rating:** {'Yes' if row['has_rating'] else 'No'}")
         
-        # Statistics
-        st.subheader("📈 Dataset Statistics")
-        stats_col1, stats_col2, stats_col3 = st.columns(3)
+        st.write("**Review Text:**")
+        st.write(row['text'])
         
-        with stats_col1:
-            st.metric("Total Characters", f"{df['character_count'].sum():,}")
-        with stats_col2:
-            st.metric("Total Words", f"{df['word_count'].sum():,}")
-        with stats_col3:
-            avg_words = df['word_count'].mean()
-            st.metric("Avg Words/Review", f"{avg_words:.1f}")
+        if row['topics']:
+            st.write("**Topics Mentioned:**")
+            st.write(", ".join(row['topics']))
+        
+        if row['problems']:
+            st.write("**Identified Problems:**")
+            for problem in row['problems']:
+                st.write(f"- {problem}")
+        
+        if row['suggestions']:
+            st.write("**Customer Suggestions:**")
+            for suggestion in row['suggestions']:
+                st.write(f"- {suggestion}")
+    
+    def render_export(self, df):
+        """Data export tab"""
+        st.subheader("Export Analyzed Data")
+        st.dataframe(df[['review_id', 'date', 'rating_text', 'rating_num',
+                         'sentiment', 'word_count', 'length_category']].head(), use_container_width=True)
+        
+        # CSV export
+        csv = df.to_csv(index=False).encode('utf-8')
+        st.download_button("Download Full Data (CSV)", csv, "review_analysis.csv", "text/csv")
+        
+        # PDF export
+        if st.button("Download Summary Report (PDF)"):
+            buffer = io.BytesIO()
+            doc = SimpleDocTemplate(buffer)
+            styles = getSampleStyleSheet()
+            story = []
+            story.append(Paragraph("Customer Review Analysis Report", styles['Title']))
+            story.append(Spacer(1, 12))
+            story.append(Paragraph(f"Total Reviews: {len(df)}", styles['Normal']))
+            story.append(Paragraph(f"Average Rating: {df['rating_num'].mean():.1f}/5", styles['Normal']))
+            story.append(Paragraph(f"Positive: {len(df[df['sentiment']=='positive'])}", styles['Normal']))
+            story.append(Paragraph(f"Negative: {len(df[df['sentiment']=='negative'])}", styles['Normal']))
+            story.append(Paragraph(f"Neutral: {len(df[df['sentiment']=='neutral'])}", styles['Normal']))
+            story.append(Spacer(1, 12))
+            story.append(Paragraph("Top Problems:", styles['Heading2']))
+            all_problems = []
+            for problems in df['problems']:
+                all_problems.extend(problems)
+            if all_problems:
+                problem_counts = pd.Series(all_problems).value_counts().head(5)
+                for prob, count in problem_counts.items():
+                    story.append(Paragraph(f"- {prob} ({count})", styles['Normal']))
+            else:
+                story.append(Paragraph("No problems detected.", styles['Normal']))
+            doc.build(story)
+            buffer.seek(0)
+            st.download_button("Download PDF", buffer, "review_summary.pdf", "application/pdf")
 
 def main():
-    """Main application function"""
-    st.sidebar.title("⚙️ Dashboard Settings")
-    
-    st.sidebar.info("""
-    **Upload Requirements:**
-    - JSON or CSV file format
-    - Should contain review text data
-    - Any structure is accepted
-    - Minimum 1 review required
-    """)
-    
-    # Initialize dashboard
     dashboard = ReviewDashboard()
+    uploaded_file, pasted_json = dashboard.render_upload_section()
     
-    # File upload section
-    uploaded_file = dashboard.render_upload_section()
-    
-    # Process file if uploaded
-    if uploaded_file is not None:
-        df = dashboard.process_uploaded_file(uploaded_file)
-        
-        if df is not None and not df.empty:
-            dashboard.create_dashboard(df)
-        else:
-            st.warning("Please upload a valid file with customer reviews.")
+    df = dashboard.process_input(uploaded_file, pasted_json)
+    if df is not None:
+        dashboard.create_dashboard(df)
     else:
-        st.info("👆 Please upload a JSON or CSV file containing customer reviews to begin analysis.")
+        st.info("Please upload a file or paste JSON data to begin analysis.")
 
 if __name__ == "__main__":
     main()
