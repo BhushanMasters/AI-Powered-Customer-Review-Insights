@@ -25,6 +25,27 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
+# Clone the repository
+git clone https://github.com/BhushanMasters/AI-Powered-Customer-Review-Insights.git
+
+# Navigate to project directory
+cd AI-Powered-Customer-Review-Insights
+
+# Create virtual environment
+python -m venv .venv
+
+# Activate virtual environment
+# On Windows:
+.venv\Scripts\activate
+# On macOS/Linux:
+source .venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the Streamlit dashboard
+streamlit run app.py
+
 ## Notes
 - First run will download Hugging Face models (internet required).
 - If you want to avoid model downloads, edit `review_analyzer.py` to skip pipeline creation or use smaller/local models.
